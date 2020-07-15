@@ -90,11 +90,19 @@ class MetricsPage(Resource):
         request.setHeader(b'Content-Type', b'text/plain; charset=utf-8; version=0.0.4')
 
         request.write('openhab_up 1\n'.encode('utf-8'))
+
+        skip = '';
+        skip_count = 0
+        item_count = 0
+
         for item in data:
             if item['state'].lower() in ['undefined', 'uninitialized', 'null', 'undef']:
+                skip = skip +'# skipping {} value {}\n'.format(item['name'], item['state'])
+                skip_count = skip_count + 1
                 continue
 
-
+            item_count = item_count + 1
+                
             if item['tags']:
                 tags = ',tags="{}"'.format(','.join(item['tags']))
             else:
@@ -126,5 +134,10 @@ class MetricsPage(Resource):
                     request.write('openhab_contact_item{{name="{}"{}{}}} 0\n'.format(item['name'], tags, groups).encode('utf-8'))
                 elif item['state'].lower() == 'open':
                     request.write('openhab_contact_item{{name="{}"{}{}}} 1\n'.format(item['name'], tags, groups).encode('utf-8'))
+        
 
+        request.write('openhab_items {}\n'.format(item_count).encode('utf-8'))
+        request.write('openhab_skip {}\n'.format(skip_count).encode('utf-8'))
+        request.write(skip.encode('utf-8'))
+                    
         request.finish()
