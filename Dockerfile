@@ -32,4 +32,7 @@ RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev && \
 
 EXPOSE 9266
 
-ENTRYPOINT ["openhab_exporter"]
+ENV OPENHAB http://192.168.0.16:18080
+
+#ENTRYPOINT ["openhab_exporter"]
+CMD ["sh", "-c", "/usr/local/bin/openhab_exporter --openhab $OPENHAB"]
