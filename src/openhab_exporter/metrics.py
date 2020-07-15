@@ -113,27 +113,32 @@ class MetricsPage(Resource):
             else:
                 groups = ""
 
+            if 'label' in item:
+                label = ',label="{}"'.format(item['label'])
+            else:
+                label = ""
+
             if re.search(r'^Number(|Item|:.+)', item['type']):
-                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups, float(item['state'].split(' ', 1)[0])).encode('utf-8'))
+                request.write('openhab_number_item{{name="{}"{}{}{}}} {}\n'.format(item['name'], tags, groups, label, float(item['state'].split(' ', 1)[0])).encode('utf-8'))
 
             elif item['type'] in ['DateTimeItem', 'DateTime']:
-                request.write('openhab_datetime_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups,
+                request.write('openhab_datetime_item{{name="{}"{}{}{}}} {}\n'.format(item['name'], tags, groups, label, 
                                                                                arrow.get(item['state'], 'YYYY-MM-DDTHH:mm:ss.SSSZ').timestamp).encode('utf-8'))
 
             elif item['type'] in ['SwitchItem', 'Switch']:
                 if item['state'].lower() == 'off':
-                    request.write('openhab_switch_item{{name="{}"{}{}}} 0\n'.format(item['name'], tags, groups).encode('utf-8'))
+                    request.write('openhab_switch_item{{name="{}"{}{}{}}} 0\n'.format(item['name'], tags, groups, label).encode('utf-8'))
                 elif item['state'].lower() == 'on':
-                    request.write('openhab_switch_item{{name="{}"{}{}}} 1\n'.format(item['name'], tags, groups).encode('utf-8'))
+                    request.write('openhab_switch_item{{name="{}"{}{}{}}} 1\n'.format(item['name'], tags, groups, label).encode('utf-8'))
 
             elif item['type'] in ['DimmerItem', 'Dimmer']:
-                request.write('openhab_number_item{{name="{}"{}{}}} {}\n'.format(item['name'], tags, groups, float(item['state'])).encode('utf-8'))
+                request.write('openhab_number_item{{name="{}"{}{}{}}} {}\n'.format(item['name'], tags, groups, label, float(item['state'])).encode('utf-8'))
 
             elif item['type'] in ['ContactItem', 'Contact']:
                 if item['state'].lower() == 'closed':
-                    request.write('openhab_contact_item{{name="{}"{}{}}} 0\n'.format(item['name'], tags, groups).encode('utf-8'))
+                    request.write('openhab_contact_item{{name="{}"{}{}{}}} 0\n'.format(item['name'], tags, groups, label).encode('utf-8'))
                 elif item['state'].lower() == 'open':
-                    request.write('openhab_contact_item{{name="{}"{}{}}} 1\n'.format(item['name'], tags, groups).encode('utf-8'))
+                    request.write('openhab_contact_item{{name="{}"{}{}{}}} 1\n'.format(item['name'], tags, groups, label).encode('utf-8'))
         
 
         request.write('openhab_items {}\n'.format(item_count).encode('utf-8'))
